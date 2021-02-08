@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="table.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <meta charset="UTF-8">
+    <title>Calculator</title>
+</head>
+<body>
+<div>
+    <div id="Button" style="height: 100px; width: 400px; background: red;">
+        <p id="TableString"></p>
+    </div>
+    <div>
+        <button onclick='tableFromString(table1)'>Учебная таблица девиации 1</button>
+        <button onclick='tableFromString(table2)'>Учебная таблица девиации 2</button>
+        <button onclick='newTable(36)'>Очистить таблицу девиации</button>
+        <div id="DeviationTable">
+        </div>
+    </div>
+    <span>Магнитное склонение</span><input id="MD" type="number" value="0"/>
+    <span>ИК</span> <input id="IK" type="number" value="0" class="pivot"/>
+    <span>МК</span> <input id="MK" type="number" value="0"/>
+    <span>КК</span> <input id="KK" type="number" value="0"/>
+    <span>Девиация:</span> <span id="Deviation"></span>
+    <span>Поправка КК:</span> <span id="Correction"></span>
+</div>
+</div>
+<script>
+    let table1 =
+        '2.5W 0.5W 1.6E 4.4E 7.6E 11.1E 14E 16.5E 18.7E ' +
+        '20.1E 20.8E 19.4E 16.7E 13.4E 9.8E 6.9E 4.6E 2.5E ' +
+        '1.1E 0.9E 1.2W 3.3W 6.5W 10.3W 13.2W 15.7W 17.9W ' +
+        '19.2W 18.1W 16.2W 13.9W 10.6W 8.3W 6.2W 4.4W 2.9W';
+
+    let table2 =
+        '3.2E 2.4E 1.8E 1.4E 0.7E 0E 1W 2.1W 2.8W ' +
+        '3.8W 4.6W 5.2W 5.6W 6.0W 5.7W 5.2W 4.6W 3.5W ' +
+        '2.4W 1.0W 0.4E 1.8E 2.8E 3.8E 4.9E 5.6E 6.0E ' +
+        '6.3E 6.4E 6.0E 5.6E 5.2E 4.6E 4.2E 3.8E 3.5E';
+
+    function createTableItem(caption, value, parent) {
+        $(`<span>${caption}</span>`).addClass("tableItemLabel").appendTo(parent);
+        $('<input/>', {
+            "class": 'tableItemInput',
+            "type": "number",
+            "value": value
+        }).appendTo(parent);
+    }
+
+    function populateTable(values) {
+        $("#DeviationTable").empty()
+        let n = values.length
+        for (let i = 0; i < n; i++) {
+            var row = $('<div/>', {
+                "class": 'tableRow',
+                "id": i
+            })
+            row.appendTo('#DeviationTable');
+            createTableItem(360 * i / n, values[i], row);
+        }
+        $(".tableRow > input").change(updateAll)
+    }
+
+    function parseDirection(directionString) {
+        let sign = directionString[directionString.length - 1] == "E" ? 1 : -1
+        return sign * parseFloat(directionString.slice(0, -1))
+    }
+
+    function writeDirection(direction) {
+        return Math.abs(direction) + (direction < 0 ? "W" : "E")
+    }
+
+    function newTable(len) {
+        populateTable(new Array(len).fill(0))
+        updateAll()
+    }
+
+    function tableFromString(devString) {
+        let devsVals = devString.split(" ").map(parseDirection)
+        populateTable(devsVals)
+        updateAll()
+    }
+
+    function valueFromTable() {
+        return $(".tableRow > input").map((i, input) => {
+            return {angle: i * 10, deviation: parseFloat(input.value)}
+        }).get()
+    }
+
+    function MKbyIK(ik) {
+        return toCourse(ik - v("#MD"))
+    }
+
+    function IKbyMK(mk) {
+        return toCourse(mk + v("#MD"))
+    }
+
+    function KKbyMK(mk) {
+        let kk1 = toCourse(mk - deviation(mk))
+        return toCourse(mk - deviation(kk1))
+    }
+
+    function MKbyKK(kk) {
+        return toCourse(kk + deviation(kk))
+    }
+
+    function toCourse(fc) {
+        return fc - 360 * Math.floor(fc / 360)
+    }
+
+    function v(selector) {
+        return toCourse(parseFloat($(selector).val()))
+    }
+
+    function correction(kk, ik) {
+        let corr = kk - ik
+        if (corr < -180)
+            corr += 360
+        if (corr > 180)
+            corr -= 360
+        return corr
+    }
+
+    function print(val) {
+        // return Math.round(val*2)/2
+        return val.toFixed(1)
+    }
+
+    function setPivot(selector) {
+        $(".pivot").removeClass("pivot")
+        $(selector).addClass("pivot")
+    }
+
+    function IKChange() {
+        setPivot("#IK")
+        let ik = v("#IK")
+        let mk = MKbyIK(ik)
+        let kk = KKbyMK(mk)
+        updateUI(kk, mk, ik)
+    }
+
+    function MKChange() {
+        setPivot("#MK")
+        let mk = v("#MK");
+        let kk = KKbyMK(mk)
+        let ik = IKbyMK(mk)
+        updateUI(kk, mk, ik)
+    }
+
+    function updateUI(kk, mk, ik) {
+        $("#KK").val(print(kk))
+        $("#MK").val(print(mk))
+        $("#IK").val(print(ik))
+        $("#Deviation").text(print(deviation(kk)))
+        $("#Correction").text(print(correction(ik, kk)))
+    }
+
+    function KKChange() {
+        setPivot("#KK")
+        let kk = v("#KK")
+        let mk = MKbyKK(kk)
+        let ik = IKbyMK(mk)
+        updateUI(kk, mk, ik)
+    }
+
+    function deviation(kk) {
+        let table = valueFromTable()
+        let n = valueFromTable().length
+        let bin = 360.0 / n
+        let i = Math.floor(kk / bin)
+        let delta = kk - i * bin
+        let left = table[i].deviation
+        let right = table[(i + 1) % n].deviation
+        return left + (right - left) * (delta / bin)
+    }
+
+    function updateAll() {
+        if ($("#IK.pivot")[0]) IKChange()
+        if ($("#MK.pivot")[0]) MKChange()
+        if ($("#KK.pivot")[0]) KKChange()
+        $("#TableString").text(valueFromTable().map(x => writeDirection(x.deviation)).join(" "))
+    }
+
+
+    $("#Button").click();
+    tableFromString(table1)
+    $("#MD").change(updateAll)
+    $("#IK").change(IKChange)
+    $("#MK").change(MKChange)
+    $("#KK").change(KKChange)
+</script>
+</body>
+</html>

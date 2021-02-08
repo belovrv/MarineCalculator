@@ -1,0 +1,15 @@
+ .tableRow {
+     height: 40px;
+     width: 400px;
+     border: black;
+     border-width: 1px;
+ }
+
+ .tableItemLabel {
+     display: inline-block;
+     width: 50px;
+ }
+
+ .pivot {
+     font-weight: bolder;
+ }
