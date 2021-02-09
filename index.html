@@ -3,19 +3,28 @@
 <head>
     <link rel="stylesheet" href="table.css">
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100&display=swap');
+    </style>
     <meta charset="UTF-8">
     <title>Calculator</title>
 </head>
 <body>
 <div>
-    <div>
+    <div hidden>
         <p id="TableString"></p>
     </div>
-    <div>
+    <div class="block">
+        <span class="caption">Девиация компасса</span>
+        <canvas id="chart"  height="800px" width="800px"/>
+    </div>
+    <div id="TableSettings" class="hide">
         <button class="block" onclick='tableFromString(table1)'>Учебная таблица девиации 1</button>
         <button class="block" onclick='tableFromString(table2)'>Учебная таблица девиации 2</button>
         <button class="block" onclick='newTable(36)'>Очистить таблицу девиации</button>
-        <div id="DeviationTable" hidden>
+        <div id="DeviationTable">
+            <div id="column1" class="column"> </div>
+            <div id="column2" class="column"> </div>
         </div>
     </div>
     <div class="block">
@@ -61,14 +70,18 @@
     }
 
     function populateTable(values) {
-        $("#DeviationTable").empty()
+        $(".tableRow").remove()
         let n = values.length
         for (let i = 0; i < n; i++) {
             var row = $('<div/>', {
                 "class": 'tableRow',
                 "id": i
             })
-            row.appendTo('#DeviationTable');
+            if (i < n/2) {
+                row.appendTo('#column1');
+            } else {
+                row.appendTo("#column2")
+            }
             createTableItem(360 * i / n, values[i], row);
         }
         $(".tableRow > input").change(updateAll)
@@ -110,6 +123,9 @@
 
     function KKbyMK(mk) {
         let kk1 = toCourse(mk - deviation(mk))
+        for (let i = 0; i < 10; i++){
+            kk1 = toCourse(mk - deviation(kk1))
+        }
         return toCourse(mk - deviation(kk1))
     }
 
@@ -192,6 +208,41 @@
         if ($("#MK.pivot")[0]) MKChange()
         if ($("#KK.pivot")[0]) KKChange()
         $("#TableString").text(valueFromTable().map(x => writeDirection(x.deviation)).join(" "))
+        drawChart()
+    }
+
+    function drawChart() {
+        var canvas = $('#chart')[0]
+        if (canvas.getContext) {
+            let ctx = canvas.getContext('2d')
+            ctx.clearRect(0, 0, canvas.width, canvas.height)
+            let r1 = 250
+            let r2 = 400
+            let cx = r2
+            let cy = r2
+            ctx.beginPath()
+            ctx.lineWidth = 0.1
+            ctx.arc(cx, cy, r1, 0, 360)
+            ctx.arc(cx, cy, r2, 0, 360)
+            ctx.stroke()
+            let table = valueFromTable()
+            table.forEach(element => {
+                    ctx.beginPath()
+                    let alpha = element.angle / 180 * Math.PI
+                    ctx.strokeStyle = `hsla(${element.angle}, 100%, 25%, 1)`
+                    ctx.fillStyle = `hsla(${element.angle}, 100%, 50%, 0.7)`
+                    let beta = (element.angle + element.deviation) / 180 * Math.PI
+                    ctx.moveTo(cx, cy)
+                    ctx.lineTo(cx + r1 * Math.sin(alpha), cy - r1 * Math.cos(alpha))
+                    ctx.lineWidth = 2
+                    ctx.lineTo(cx + r2 * Math.sin(beta), cy - r2 * Math.cos(beta))
+                    ctx.lineWidth = 1
+                    ctx.lineTo(cx, cy)
+                    ctx.stroke()
+                    ctx.fill()
+                }
+            )
+        }
     }
 
     tableFromString(table1)
@@ -199,6 +250,14 @@
     $("#IK").change(IKChange)
     $("#MK").change(MKChange)
     $("#KK").change(KKChange)
+    $("#chart").click(function() {
+        let settings = $("#TableSettings").taggle()
+        if (settings.hasClass("hide")) {
+            settings.removeClass("hide");
+        } else {
+            settings.addClass("hide");
+        }
+    })
 </script>
 </body>
 </html>
