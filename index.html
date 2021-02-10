@@ -299,6 +299,14 @@
             arrow.addClass("turnedover");
         }
     })
+    $("input").focus(function (){
+        this.value = ""
+    })
+    $("input").focusout(function (){
+        this.value = "0"
+        updateAll()
+    })
+
 </script>
 </body>
 </html>
