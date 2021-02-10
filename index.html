@@ -15,7 +15,7 @@
 <div class="container">
     <div class="centerblock">
         <div class="block" id="deviation">
-            <span class="caption">Девиация компасса</span>
+            <span class="caption">Девиация компаса</span>
             <img id="arrow" src="arrowup.png">
             <canvas id="smallchart" height="200px" width="200px" ></canvas>
         </div>
@@ -299,11 +299,15 @@
             arrow.addClass("turnedover");
         }
     })
+
+    let lastVal = 0
     $("input").focus(function (){
+        lastVal = this.value
         this.value = ""
     })
     $("input").focusout(function (){
-        this.value = "0"
+        if (this.value == "")
+            this.value = lastVal
         updateAll()
     })
 
