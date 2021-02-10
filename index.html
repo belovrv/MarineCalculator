@@ -11,39 +11,41 @@
 </head>
 <body>
 <div>
-    <div hidden>
-        <p id="TableString"></p>
-    </div>
-    <div class="block">
-        <span class="caption">Девиация компасса</span>
-        <canvas id="chart"  height="800px" width="800px"/>
-    </div>
-    <div id="TableSettings" class="hide">
-        <button class="block" onclick='tableFromString(table1)'>Учебная таблица девиации 1</button>
-        <button class="block" onclick='tableFromString(table2)'>Учебная таблица девиации 2</button>
-        <button class="block" onclick='newTable(36)'>Очистить таблицу девиации</button>
-        <div id="DeviationTable">
-            <div id="column1" class="column"> </div>
-            <div id="column2" class="column"> </div>
+    <div class="container">
+        <div hidden>
+            <p id="TableString"></p>
         </div>
-    </div>
-    <div class="block">
-        <span class="caption">Cклонение</span><input id="MD" type="number" value="0" class="value"/>
-    </div>
-    <div class="block">
-        <span class="caption">ИК</span> <input id="IK" type="number" value="0" class="pivot value"/>
-    </div>
-    <div class="block">
-        <span class="caption">МК</span> <input id="MK" type="number" value="0" class="value"/>
-    </div>
-    <div class="block">
-        <span class="caption">КК</span> <input id="KK" type="number" value="0" class="value"/>
-    </div>
-    <div class="block">
-        <span class="caption">Девиация:</span> <span id="Deviation" class="value"></span>
-    </div>
-    <div class="block">
-        <span class="caption">Поправка КК:</span> <span id="Correction" class="value"></span>
+        <div class="block">
+            <span class="caption">Девиация компасса</span>
+            <canvas id="chart" height="800px" width="800px"/>
+        </div>
+        <div id="TableSettings" class="hide">
+            <button class="block" onclick='tableFromString(table1)'>Учебная таблица девиации 1</button>
+            <button class="block" onclick='tableFromString(table2)'>Учебная таблица девиации 2</button>
+            <button class="block" onclick='newTable(36)'>Очистить таблицу девиации</button>
+            <div id="DeviationTable">
+                <div id="column1" class="column"></div>
+                <div id="column2" class="column"></div>
+            </div>
+        </div>
+        <div class="block">
+            <span class="caption">Cклонение</span><input id="MD" type="number" value="0" class="value"/>
+        </div>
+        <div class="block">
+            <span class="caption">ИК</span> <input id="IK" type="number" value="0" class="pivot value"/>
+        </div>
+        <div class="block">
+            <span class="caption">МК</span> <input id="MK" type="number" value="0" class="value"/>
+        </div>
+        <div class="block">
+            <span class="caption">КК</span> <input id="KK" type="number" value="0" class="value"/>
+        </div>
+        <div class="block">
+            <span class="caption">Девиация:</span> <span id="Deviation" class="value"></span>
+        </div>
+        <div class="block">
+            <span class="caption">Поправка КК:</span> <span id="Correction" class="value"></span>
+        </div>
     </div>
 </div>
 </div>
@@ -77,7 +79,7 @@
                 "class": 'tableRow',
                 "id": i
             })
-            if (i < n/2) {
+            if (i < n / 2) {
                 row.appendTo('#column1');
             } else {
                 row.appendTo("#column2")
@@ -123,7 +125,7 @@
 
     function KKbyMK(mk) {
         let kk1 = toCourse(mk - deviation(mk))
-        for (let i = 0; i < 10; i++){
+        for (let i = 0; i < 10; i++) {
             kk1 = toCourse(mk - deviation(kk1))
         }
         return toCourse(mk - deviation(kk1))
@@ -250,8 +252,8 @@
     $("#IK").change(IKChange)
     $("#MK").change(MKChange)
     $("#KK").change(KKChange)
-    $("#chart").click(function() {
-        let settings = $("#TableSettings").taggle()
+    $("#chart").click(function () {
+        let settings = $("#TableSettings")
         if (settings.hasClass("hide")) {
             settings.removeClass("hide");
         } else {
