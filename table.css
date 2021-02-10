@@ -3,6 +3,7 @@
     border: black;
     border-width: 1px;
     width: 100%;
+    margin: 10px;
 }
 
 .column {
@@ -12,18 +13,21 @@
 
 .tableItemLabel {
     display: inline-block;
-    width: 30%;
+    width: 50px;
 }
 
 .tableItemInput {
     display: inline-block;
-    width: 70%;
+    width: 50%;
 }
 
 #TableSettings {
+    font-size: 0.7em;
     opacity: 1;
     display: block;
     transition: all 1s;
+    background-color: whitesmoke;
+    padding: 10px;
 }
 
 #TableSettings.hide {
@@ -69,21 +73,43 @@ button:focus {
     background-color: var(--lgtr-blue);
 }
 
-#chart {
+#smallchart {
     height: 100%;
     float: right;
-    margin-right: 50px;
+    margin-right: 6%;
 }
 
-@media only screen and (min-width: 1024px) {
-    #DeviationTable {
-        display: flex;
-    }
+#deviation{
+    cursor: pointer;
+}
+
+#chart {
+    display: block;
+    margin: 30px auto;
+    width: 100%;
+}
+
+#arrow {
+    float: right;
+    clear: right;
+    transition: all 0.1s;
+}
+
+#arrow.turnedover {
+    transform: rotate(
+            180deg
+    );
+}
+
+#DeviationTable {
+    display: flex;
 }
 
 button {
     border-radius: 100px;
     cursor: pointer;
+    width: 70%;
+    margin: 10px auto;
 }
 
 button:focus-within {
@@ -96,11 +122,11 @@ button:focus-within {
 }
 
 .container {
-    max-width: 500px;
+    max-width: 700px;
     margin: 0 auto;
 }
 
-.centerblock{
+.centerblock {
 }
 
 .block {

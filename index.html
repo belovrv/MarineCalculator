@@ -13,17 +13,16 @@
 <body>
 <div class="container">
     <div class="centerblock">
-        <div hidden>
-            <p id="TableString"></p>
-        </div>
-        <div class="block">
+        <div class="block" id="deviation">
             <span class="caption">Девиация компасса</span>
-            <canvas id="chart" height="800px" width="800px"/>
+            <img id="arrow" src="arrowup.png">
+            <canvas id="smallchart" height="200px" width="200px" ></canvas>
         </div>
         <div id="TableSettings" class="hide">
-            <button class="block" onclick='tableFromString(table1)'>Учебная таблица девиации 1</button>
-            <button class="block" onclick='tableFromString(table2)'>Учебная таблица девиации 2</button>
-            <button class="block" onclick='newTable(36)'>Очистить таблицу девиации</button>
+            <canvas id="chart" height="800px" width="800px"> </canvas>
+            <button onclick='tableFromString(table1)'>Учебная таблица девиации 1</button>
+            <button onclick='tableFromString(table2)'>Учебная таблица девиации 2</button>
+            <button onclick='newTable(36)'>Очистить таблицу девиации</button>
             <div id="DeviationTable">
                 <div id="column1" class="column"></div>
                 <div id="column2" class="column"></div>
@@ -214,38 +213,70 @@
         drawChart()
     }
 
-    function drawChart() {
-        var canvas = $('#chart')[0]
+    function drawOnCanvas(canvas, size) {
         if (canvas.getContext) {
             let ctx = canvas.getContext('2d')
             ctx.clearRect(0, 0, canvas.width, canvas.height)
-            let r1 = 250
-            let r2 = 400
-            let cx = r2
-            let cy = r2
-            ctx.beginPath()
-            ctx.lineWidth = 0.1
-            ctx.arc(cx, cy, r1, 0, 360)
-            ctx.arc(cx, cy, r2, 0, 360)
-            ctx.stroke()
-            let table = valueFromTable()
-            table.forEach(element => {
+            let r2 = size - 35
+            let r1 = r2 / 1.5
+            let cx = size
+            let cy = size
+
+            const image = new Image();
+            image.src = 'compass.png';
+            // image.onload = function () {ctx.drawImage(image, cx - r1/2 + 10, cy-r1/2+10, r1-20, r1-20)}
+            image.onload = function () {
+                if (size > 150) {
+                    ctx.drawImage(image, 0, 0, size * 2, size * 2)
+
                     ctx.beginPath()
-                    let alpha = element.angle / 180 * Math.PI
-                    ctx.strokeStyle = `hsla(${element.angle}, 100%, 25%, 1)`
-                    ctx.fillStyle = `hsla(${element.angle}, 100%, 50%, 0.7)`
-                    let beta = (element.angle + element.deviation) / 180 * Math.PI
-                    ctx.moveTo(cx, cy)
-                    ctx.lineTo(cx + r1 * Math.sin(alpha), cy - r1 * Math.cos(alpha))
-                    ctx.lineWidth = 2
-                    ctx.lineTo(cx + r2 * Math.sin(beta), cy - r2 * Math.cos(beta))
-                    ctx.lineWidth = 1
-                    ctx.lineTo(cx, cy)
-                    ctx.stroke()
+                    ctx.arc(cx, cy, r2, 0, 360)
+                    ctx.fillStyle = "white"
                     ctx.fill()
+
+                    ctx.beginPath()
+                    ctx.lineWidth = 1
+                    ctx.arc(cx, cy, r1, 0, 360)
+                    ctx.arc(cx, cy, r2, 0, 360)
+                    ctx.strokeStyle = "black"
+                    ctx.stroke()
                 }
-            )
+                let table = valueFromTable()
+                table.forEach(element => {
+                        ctx.beginPath()
+                        let alpha = element.angle / 180 * Math.PI
+                        if (size > 150){
+                            ctx.strokeStyle = `hsla(${element.angle}, 100%, 25%, 1)`
+                            ctx.fillStyle = `hsla(${element.angle}, 100%, 50%, 0.7)`
+                        }
+                        let beta = (element.angle + element.deviation) / 180 * Math.PI
+                        ctx.moveTo(cx, cy)
+                        ctx.lineTo(cx + r1 * Math.sin(alpha), cy - r1 * Math.cos(alpha))
+                        ctx.lineWidth = 2
+                        ctx.lineTo(cx + r2 * Math.sin(beta), cy - r2 * Math.cos(beta))
+                        ctx.lineWidth = 1
+                        ctx.lineTo(cx, cy)
+                        ctx.stroke()
+                        ctx.fill()
+                    }
+                )
+
+                if (size > 150)
+                    ctx.drawImage(image, cx-r1, cy-r1, r1*2, r1*2)
+
+                // ctx.beginPath()
+                // ctx.arc(cx, cy, r1-20, 0, 360)
+                // ctx.fillStyle = "white"
+                // ctx.fill()
+            }
         }
+    }
+
+    function drawChart() {
+        var canvas = $('#chart')[0]
+        drawOnCanvas(canvas, 400);
+        var canvas = $('#smallchart')[0]
+        drawOnCanvas(canvas, 100);
     }
 
     tableFromString(table1)
@@ -253,12 +284,18 @@
     $("#IK").change(IKChange)
     $("#MK").change(MKChange)
     $("#KK").change(KKChange)
-    $("#chart").click(function () {
+    $("#deviation").click(function () {
         let settings = $("#TableSettings")
         if (settings.hasClass("hide")) {
             settings.removeClass("hide");
         } else {
             settings.addClass("hide");
+        }
+        let arrow = $("#arrow")
+        if (arrow.hasClass("turnedover")) {
+            arrow.removeClass("turnedover");
+        } else {
+            arrow.addClass("turnedover");
         }
     })
 </script>
